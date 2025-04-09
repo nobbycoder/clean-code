@@ -3,7 +3,6 @@ package org.example.basic;
 import java.time.LocalDate;
 
 public class Medicine {
-
     private final LocalDate expirationDate;
     private final Boolean approvedForConsumption;
     private final Integer inspectorId;
