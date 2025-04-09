@@ -13,7 +13,6 @@ public class Item {
         this.sellIn = sellIn;
         this.quality = quality;
     }
-
     @Override
     public String toString() {
         return "\n name=" + name + ", " + sellIn + ", " + quality + "\n";
