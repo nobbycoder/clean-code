@@ -1,93 +1,106 @@
 package org.example.exercises;
 
 import java.util.Arrays;
+import java.util.Map;
+
+interface ItemUpdater {
+    void updateItem(Item item);
+}
+
+class DefaultItemUpdater implements ItemUpdater {
+    @Override
+    public void updateItem(Item item) {
+        if (item.quality > 0) {
+            item.quality--;
+        }
+        item.sellIn--;
+
+        if (item.sellIn < 0 && item.quality > 0) {
+            item.quality--;
+        }
+    }
+}
+
+class WineUpdater implements ItemUpdater {
+    @Override
+    public void updateItem(Item item) {
+        item.sellIn--;
+        if (item.quality < 50) {
+            item.quality++;
+            if (item.sellIn < 0 && item.quality < 50) {
+                item.quality++;
+            }
+        }
+    }
+}
+
+class ConcertPassUpdater implements ItemUpdater {
+    @Override
+    public void updateItem(Item item) {
+        item.sellIn--;
+        if (item.sellIn < 0) {
+            item.quality = 0;
+            return;
+        }
+
+        if (item.quality < 50) {
+            item.quality++;
+            if (item.sellIn < 10 && item.quality < 50) item.quality++;
+            if (item.sellIn < 5 && item.quality < 50) item.quality++;
+        }
+    }
+}
+
+class PokemonUpdater implements ItemUpdater {
+    @Override
+    public void updateItem(Item item) {
+    }
+}
+
+
+class ItemUpdaterImplementation {
+    private static final Map<String, ItemUpdater> updaterMap = Map.of(
+            "Aged Wine", new WineUpdater(),
+            "ColdPlay concert passes", new ConcertPassUpdater(),
+            "PokemonGo", new PokemonUpdater()
+    );
+
+    public static ItemUpdater getUpdater(Item item) {
+        return updaterMap.getOrDefault(item.name, new DefaultItemUpdater());
+    }
+}
+
 
 public class OlxApp {
-	
-	public Item[] items;
 
-	public OlxApp(Item[] items) {
-		this.items = items;
-	}
+    public Item[] items;
 
-	public static void main(String[] args) {
+    public OlxApp(Item[] items) {
+        this.items = items;
+    }
 
-		Item[] items = new Item[] { 
-							new Item("Mangoes", 10, 20)
-					   };
+    public static void main(String[] args) {
 
-		OlxApp app = new OlxApp(items);
+        Item[] items = new Item[]{new Item("Mangoes", 10, 20)};
 
-		app.updateQuality();
+        OlxApp app = new OlxApp(items);
 
-		System.out.println(app);
+        app.updateQuality();
 
-	}
+        System.out.println(app);
 
-	public void updateQuality() {
-		for (int i = 0; i < items.length; i++) {
-			if (items[i].name != "Aged Wine" && items[i].name != "ColdPlay concert passes") {
-				if (items[i].quality > 0) {
-					if (items[i].name != "PokemonGo") {
-						items[i].quality = items[i].quality - 1;
-					}
-				}
-			} else {
-				// This part handles the items for which quality can increase
-				// "ColdPlay concert passes" and "Aged Wine"
+    }
 
-				if (items[i].quality < 50) {
-					items[i].quality = items[i].quality + 1;
+    public void updateQuality() {
+        for (Item item : items) {
+            ItemUpdater updater = ItemUpdaterImplementation.getUpdater(item);
+            updater.updateItem(item);
+        }
+    }
 
-					if (items[i].name == "ColdPlay concert passes") {
-						if (items[i].sellIn < 11) {
-							if (items[i].quality < 50) {
-								items[i].quality = items[i].quality + 1;
-							}
-						}
-
-						if (items[i].sellIn < 6) {
-							if (items[i].quality < 50) {
-								items[i].quality = items[i].quality + 1;
-							}
-						}
-					}
-				}
-			}
-
-			// Everything except for Sulfuras the sellIn Decreases
-			if (items[i].name != "PokemonGo") {
-				items[i].sellIn = items[i].sellIn - 1;
-			}
-
-			if (items[i].sellIn < 0) {
-				if (items[i].name != "Aged Wine") {
-
-					if (items[i].name != "ColdPlay concert passes") {
-						if (items[i].quality > 0) {
-							if (items[i].name != "PokemonGo") {
-								items[i].quality = items[i].quality - 1;
-							}
-						}
-					} else {
-						// For Backstage passes with sellin less than zero
-						// quality is set to zero
-						items[i].quality = 0;
-					}
-				} else {
-					// For Aged Wine below 50 quality increases actually by 2
-					// In the previous line
-					if (items[i].quality < 50) {
-						items[i].quality = items[i].quality + 1;
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public String toString() {
-		return Arrays.toString(items);
-	}
+    @Override
+    public String toString() {
+        return Arrays.toString(items);
+    }
 
 }
